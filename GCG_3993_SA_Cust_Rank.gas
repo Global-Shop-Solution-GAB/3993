@@ -1,0 +1,387 @@
+Program.Sub.ScreenSU.Start
+gui.SS_Form1..create
+gui.SS_Form1..caption("Sales Analysis: Customer Rank")
+gui.SS_Form1..size(4135,2715)
+gui.SS_Form1..minx(0)
+gui.SS_Form1..miny(0)
+gui.SS_Form1..position(0,0)
+gui.SS_Form1..event(unload,ss_form1_unload)
+gui.SS_Form1..alwaysontop(False)
+gui.SS_Form1..fontname("Arial")
+gui.SS_Form1..fontsize(8)
+gui.SS_Form1..forecolor(0)
+gui.SS_Form1..fontstyle(,,,,)
+gui.SS_Form1..BackColor(-2147483633)
+gui.SS_Form1..controlbox(True)
+gui.SS_Form1..maxbutton(False)
+gui.SS_Form1..minbutton(False)
+gui.SS_Form1..mousepointer(0)
+gui.SS_Form1..moveable(True)
+gui.SS_Form1..sizeable(False)
+gui.SS_Form1..ShowInTaskBar(True)
+gui.SS_Form1..titlebar(True)
+gui.SS_Form1.lbl_dtpBeg.create(label,"Starting Date",True,1800,200,1,100,135,True,0,Arial,8,-2147483633,0)
+gui.SS_Form1.lbl_dtpBeg.defaultvalue("")
+gui.SS_Form1.lbl_dtpBeg.controlgroup(0)
+gui.SS_Form1.dtpBeg.create(datepicker)
+gui.SS_Form1.dtpBeg.visible(True)
+gui.SS_Form1.dtpBeg.size(1800,345)
+gui.SS_Form1.dtpBeg.zorder(0)
+gui.SS_Form1.dtpBeg.position(100,335)
+gui.SS_Form1.dtpBeg.enabled(True)
+gui.SS_Form1.dtpBeg.checkbox(False)
+gui.SS_Form1.dtpBeg.defaultvalue("")
+gui.SS_Form1.dtpBeg.controlgroup(0)
+gui.SS_Form1.lbl_dtpEnd.create(label,"Ending Date",True,1800,200,1,1985,135,True,0,Arial,8,-2147483633,0)
+gui.SS_Form1.lbl_dtpEnd.defaultvalue("")
+gui.SS_Form1.lbl_dtpEnd.controlgroup(0)
+gui.SS_Form1.dtpEnd.create(datepicker)
+gui.SS_Form1.dtpEnd.visible(True)
+gui.SS_Form1.dtpEnd.size(1800,345)
+gui.SS_Form1.dtpEnd.zorder(0)
+gui.SS_Form1.dtpEnd.position(1985,335)
+gui.SS_Form1.dtpEnd.enabled(True)
+gui.SS_Form1.dtpEnd.checkbox(False)
+gui.SS_Form1.dtpEnd.defaultvalue("")
+gui.SS_Form1.dtpEnd.controlgroup(0)
+gui.SS_Form1.lbl_txtRank.create(label,"Max Rank Number",True,1800,200,1,100,850,True,0,Arial,8,-2147483633,0)
+gui.SS_Form1.lbl_txtRank.defaultvalue("")
+gui.SS_Form1.lbl_txtRank.controlgroup(0)
+gui.SS_Form1.txtRank.create(textbox,"",True,1800,330,0,100,1050,True,0,Arial,8,16777215,1)
+gui.SS_Form1.txtRank.numericonly(2)
+gui.SS_Form1.txtRank.defaultvalue("")
+gui.SS_Form1.txtRank.controlgroup(0)
+gui.SS_Form1.cmdPrint.create(button)
+gui.SS_Form1.cmdPrint.caption("Print")
+gui.SS_Form1.cmdPrint.visible(True)
+gui.SS_Form1.cmdPrint.size(1000,360)
+gui.SS_Form1.cmdPrint.zorder(0)
+gui.SS_Form1.cmdPrint.position(100,1615)
+gui.SS_Form1.cmdPrint.enabled(True)
+gui.SS_Form1.cmdPrint.fontname("Arial")
+gui.SS_Form1.cmdPrint.fontsize(8)
+gui.SS_Form1.cmdPrint.event(click,cmdprint_click)
+gui.SS_Form1.cmdPrint.defaultvalue("")
+gui.SS_Form1.cmdPrint.controlgroup(0)
+
+
+Program.Sub.ScreenSU.End
+
+Program.Sub.Preflight.Start
+
+Variable.Global.iRunID.Declare(Long,0)
+Variable.Global.iLogID.Declare(Long,0)
+Variable.UDT.uCustomer.Define("Customer",String,Customer)
+Variable.UDT.uCustomer.Define("Name_Customer",String,Name_Customer)
+Variable.UDT.uCustomer.Define("C_Sort_1",String,C_Sort_1)
+Variable.uGlobal.uCustomer.Declare("uCustomer")
+Variable.UDT.uOrdH.Define("Customer",String)
+Variable.UDT.uOrdH.Define("BIRUNID",String)
+Variable.UDT.uOrdH.Define("C_P_Flag",String)
+Variable.UDT.uOrdH.Define("Rank",String)
+Variable.UDT.uOrdH.Define("Name_Cust",String)
+Variable.UDT.uOrdH.Define("Part",String,Part)
+Variable.UDT.uOrdH.Define("Cost",Float,Cost)
+Variable.UDT.uOrdH.Define("Date_Invoice",Date,Date_Invoice)
+Variable.UDT.uOrdH.Define("Price",Float,Price)
+Variable.UDT.uOrdH.Define("Extension",Float,Extension)
+Variable.UDT.uOrdH.Define("Margin",Float,Margin)
+Variable.UDT.uOrdH.Define("PY_Price",Float)
+Variable.UDT.uOrdH.Define("PY_Extension",Float)
+Variable.UDT.uOrdH.Define("PY_Margin",Float)
+Variable.UDT.uOrdH.Define("PY_Cost",Float)
+Variable.uGlobal.uOrdH.Declare("uOrdH")
+Variable.Global.iRank.Declare(Long,0)
+Program.Sub.Preflight.End
+
+Program.Sub.Main.Start
+F.Intrinsic.Control.SetErrorHandler("Main_Err")
+F.Intrinsic.Control.ClearErrors
+
+V.Local.sError.Declare(String)
+
+'Quote 5978-1
+'coded by TRT
+
+F.ODBC.Connection!conX.OpenConnection(V.Ambient.PDSN,V.Ambient.PUser,V.Ambient.PPass,1000)
+
+Gui.SS_Form1..Show
+'f.Intrinsic.Debug.benchmarkmodeenable
+
+F.Intrinsic.Control.ExitSub
+
+F.Intrinsic.Control.Label("Main_Err")
+F.Intrinsic.Control.If(V.Ambient.ErrorNumber,<>,0)
+	Function.Intrinsic.String.Concat("Project: GCG_3993_SA_Cust_Rank.gas",V.Ambient.Newline,V.Ambient.Newline,"Subroutine: ",V.Ambient.CurrentSubroutine,V.Ambient.NewLine,"Error Occurred ",V.Ambient.ErrorNumber," with description ",V.Ambient.ErrorDescription,V.Local.sError)
+	F.Intrinsic.UI.Msgbox(V.Local.sError)
+	F.Intrinsic.Control.CallSub(Ss_form1_unload)
+Function.Intrinsic.Control.EndIf
+
+
+Program.Sub.Main.End
+
+program.sub.ss_form1_unload.start
+F.Intrinsic.Control.SetErrorHandler("ss_form1_unload_Err")
+F.Intrinsic.Control.ClearErrors
+
+V.Local.sError.Declare(String)
+
+F.ODBC.Connection!conX.Close
+
+F.Intrinsic.Control.End
+
+F.Intrinsic.Control.ExitSub
+
+F.Intrinsic.Control.Label("ss_form1_unload_Err")
+F.Intrinsic.Control.If(V.Ambient.ErrorNumber,<>,0)
+	Function.Intrinsic.String.Concat("Project: GCG_3993_SA_Cust_Rank.gas",V.Ambient.Newline,V.Ambient.Newline,"Subroutine: ",V.Ambient.CurrentSubroutine,V.Ambient.NewLine,"Error Occurred ",V.Ambient.ErrorNumber," with description ",V.Ambient.ErrorDescription,V.Local.sError)
+	F.Intrinsic.UI.Msgbox(V.Local.sError)
+	F.Intrinsic.Control.End
+Function.Intrinsic.Control.EndIf
+
+
+program.sub.ss_form1_unload.end
+
+program.sub.cmdprint_click.start
+F.Intrinsic.Control.SetErrorHandler("cmdprint_click_Err")
+F.Intrinsic.Control.ClearErrors
+
+V.Local.sError.Declare(String)
+V.Local.sRank.Declare(String)
+V.Local.iDate.Declare(Long)
+
+V.Global.iRank.Set(V.Screen.SS_Form1!txtRank.Text)
+
+F.Intrinsic.Date.DateDiff("YYYY",V.Screen.SS_Form1!dtpBeg.Value,V.Screen.SS_Form1!dtpEnd.Value,V.Local.iDate)
+
+F.Intrinsic.Control.If(V.Global.iRank,<,-1)
+	Gui.SS_Form1.txtRank.SetFocus
+	F.Intrinsic.Control.ExitSub
+F.Intrinsic.Control.ElseIf(V.Screen.SS_Form1!dtpBeg.Value,>,V.Screen.SS_Form1!dtpEnd.Value)
+	Gui.SS_Form1.dtpBeg.SetFocus
+	F.Intrinsic.Control.ExitSub
+F.Intrinsic.Control.ElseIf(V.Local.iDate,>,1)
+	Gui.SS_Form1.dtpBeg.SetFocus
+	F.Intrinsic.Control.ExitSub
+F.Intrinsic.Control.EndIf
+
+Gui.SS_Form1..Visible(False)
+F.Intrinsic.UI.InvokeWaitDialog("Processing records...")
+
+F.Global.BI.GetRunID(V.Global.iRunID)
+
+F.Global.BI.StartLogging(V.Global.iRunID,-1,-1,"",V.Global.iLogID)
+
+F.Intrinsic.Control.CallSub(Popudt)
+
+F.Global.BI.StopLogging(V.Global.iLogID)
+
+F.Intrinsic.UI.CloseWaitDialog
+
+F.Intrinsic.Control.CallSub(Callbi)
+
+F.Intrinsic.Control.ExitSub
+
+F.Intrinsic.Control.Label("cmdprint_click_Err")
+F.Intrinsic.Control.If(V.Ambient.ErrorNumber,<>,0)
+	Function.Intrinsic.String.Concat("Project: GCG_3993_SA_Cust_Rank.gas",V.Ambient.Newline,V.Ambient.Newline,"Subroutine: ",V.Ambient.CurrentSubroutine,V.Ambient.NewLine,"Error Occurred ",V.Ambient.ErrorNumber," with description ",V.Ambient.ErrorDescription,V.Local.sError)
+	F.Intrinsic.UI.Msgbox(V.Local.sError)
+	F.Intrinsic.Control.CallSub(Ss_form1_unload)
+Function.Intrinsic.Control.EndIf
+
+
+program.sub.cmdprint_click.end
+
+Program.Sub.CallBI.Start
+F.Intrinsic.Control.SetErrorHandler("CallBI_Err")
+F.Intrinsic.Control.ClearErrors
+
+V.Local.sError.Declare(String)
+V.Local.sParams.Declare(String)
+V.Local.sVal.Declare(String)
+
+V.Local.sParams.Set("sStartDate*!*sEndDate*!*Rank")
+F.Intrinsic.String.Build("{0}*!*{1}*!*{2}",V.Screen.SS_Form1!dtpBeg.Value,V.Screen.SS_Form1!dtpEnd.Value,V.Global.iRank,V.Local.sVal)
+
+F.Global.BI.RunReportPreProcessor(V.Global.iRunID,V.Global.iLogID,V.Local.sParams.Trim,V.Local.sVal.Trim,"",-1,True,"",1,"",-1,"","",V.Global.iLogID)
+
+F.Intrinsic.Control.ExitSub
+
+F.Intrinsic.Control.Label("CallBI_Err")
+F.Intrinsic.Control.If(V.Ambient.ErrorNumber,<>,0)
+	Function.Intrinsic.String.Concat("Project: GCG_3993_SA_Cust_Rank.gas",V.Ambient.Newline,V.Ambient.Newline,"Subroutine: ",V.Ambient.CurrentSubroutine,V.Ambient.NewLine,"Error Occurred ",V.Ambient.ErrorNumber," with description ",V.Ambient.ErrorDescription,V.Local.sError)
+	F.Intrinsic.UI.Msgbox(V.Local.sError)
+	F.Intrinsic.Control.CallSub(Ss_form1_unload)
+Function.Intrinsic.Control.EndIf
+
+
+Program.Sub.CallBI.End
+
+Program.Sub.POPuDT.Start
+F.Intrinsic.Control.SetErrorHandler("POPuDT_Err")
+F.Intrinsic.Control.ClearErrors
+
+V.Local.sError.Declare(String)
+V.Local.sSQL.Declare(String)
+V.Local.sPDateStart.Declare(String)
+V.Local.sPDateEnd.Declare(String)
+V.Local.sCDateStart.Declare(String)
+V.Local.sCDateEnd.Declare(String)
+V.Local.iC.Declare(Long)
+
+V.uGlobal.uCustomer.Redim(-1,-1)
+V.uGlobal.uOrdH.Redim(-1,-1)
+
+V.Local.sCDateStart.Set(V.Screen.SS_Form1!dtpBeg.value)
+V.Local.sCDateEnd.Set(V.Screen.SS_Form1!dtpEnd.Value)
+F.Intrinsic.Date.DateAdd("YYYY",-1,V.Local.sCDateStart,V.Local.sPDateStart)
+F.Intrinsic.Date.DateAdd("YYYY",-1,V.Local.sCDateEnd,V.Local.sPDateEnd)
+
+'Getting none unique collumn reference on customer 
+V.Local.sSQL.Set("Select V_Customer_Master.Customer, Name_Customer,C_Sort_1 From V_Customer_Master Left Join V_Customer_Sales on v_Customer_Master.customer = v_Customer_Sales.customer order by c_sort_1")
+'V.Local.sSQL.Set("Select Customer, Name_Customer,C_Sort_1 From V_Customer_Master Left Join V_Customer_Sales on v_Customer_Master.customer = v_Customer_Sales.customer order by c_sort_1")
+
+F.ODBC.Connection!conX.OpenLocalRecordsetRO("rst",V.Local.sSQL)
+F.Intrinsic.Control.If(V.ODBC.conX!rst.EOF,<>,True)
+	F.Intrinsic.Variable.LoadUDTFromRecordset("conx","rst","v.uglobal.uCustomer",False)
+F.Intrinsic.Control.EndIf
+F.ODBC.conX!rst.Close
+
+F.Intrinsic.Control.For(V.Local.iC,0,V.uGlobal.uCustomer.UBound,1)
+	'current date query
+	
+	F.Intrinsic.String.Build("Select Date_Invoice,Part,Qty_Shipped * Cost As Cost,Price,Extension,Margin From Order_Hist_Line Where Line_Type Not In ('F','P') And Customer = '{0}' And Date_Invoice Between '{1}' And '{2}'",V.uGlobal.uCustomer(v.Local.iC)!Customer,V.Local.sCDateStart.FormatYYYY-MM-DD,V.Local.sCDateEnd.FormatYYYY-MM-DD,V.Local.sSQL)
+	F.ODBC.Connection!conX.OpenLocalRecordsetRO("rst",V.local.sSQL)
+	F.Intrinsic.Control.If(V.ODBC.conX!rst.EOF,<>,True)
+		'call sub to set field ref of udt for current year data
+		F.Intrinsic.Control.CallSub(Setfieldref,"Run","0")
+		F.Intrinsic.Variable.LoadUDTFromRecordset("conX","rst","v.uglobal.uOrdH",False,500)
+	F.Intrinsic.Control.EndIf
+	F.ODBC.conX!rst.Close
+	F.Intrinsic.Variable.UDTMultiSeekSet(V.uGlobal.uOrdH!C_P_Flag,"",V.uGlobal.uOrdH!C_P_Flag,"C")
+	'previous date query
+	F.Intrinsic.String.Build("Select Date_Invoice,Part,Qty_Shipped * Cost As Cost,Price,Extension,Margin From Order_Hist_Line Where Line_Type Not In('F','P') And Customer = '{0}' And Date_Invoice Between '{1}' And '{2}'",V.uGlobal.uCustomer(v.Local.iC)!Customer,V.Local.sPDateStart.FormatYYYY-MM-DD,V.Local.sPDateEnd.FormatYYYY-MM-DD,V.Local.sSQL)
+	F.ODBC.Connection!conX.OpenLocalRecordsetRO("rst",V.local.sSQL)
+	F.Intrinsic.Control.If(V.ODBC.conX!rst.EOF,<>,True)
+		'call sub to set field ref of udt for previous year data
+		F.Intrinsic.Control.CallSub(Setfieldref,"Run","2")
+F.Intrinsic.Debug.Stop
+		F.Intrinsic.Variable.LoadUDTFromRecordset("conX","rst","v.uglobal.uOrdH",True,500)
+	F.Intrinsic.Control.EndIf
+	F.ODBC.conX!rst.Close
+	F.Intrinsic.Variable.UDTMultiSeekSet(V.uGlobal.uOrdH!C_P_Flag,"",V.uGlobal.uOrdH!C_P_Flag,"P")
+	F.Intrinsic.Variable.UDTSetMemberValue(V.uGlobal.uOrdH!BIRUNID,V.Global.iRunID)
+	F.Intrinsic.Variable.UDTSetMemberValue(V.uGlobal.uOrdh!Customer,V.uGlobal.uCustomer(v.Local.iC)!Customer)
+	F.Intrinsic.Variable.UDTSetMemberValue(V.uGlobal.uOrdh!Name_Cust,V.uGlobal.uCustomer(v.Local.iC)!Name_Customer)
+	F.Intrinsic.Variable.UDTSetMemberValue(V.uGlobal.uOrdh!Rank,V.uGlobal.uCustomer(v.Local.iC)!C_Sort_1)
+	F.Intrinsic.Variable.UDTMultiSeekSet(V.uGlobal.uOrdH!Rank,"",V.uGlobal.uOrdH!Rank,"99")
+	F.Intrinsic.Control.If(V.uGlobal.uOrdH.UBound,>,-1)
+		F.Intrinsic.Control.CallSub(Setfieldref,"Run","1")
+'F.Intrinsic.Debug.InvokeDebugger
+
+F.Intrinsic.Debug.Stop
+
+		F.ODBC.Connection!conX.OpenLocalRecordsetRW("rst","Select * From GCG_3993_SA_CustRank")
+		F.Intrinsic.Variable.saveudttorecordset("conX","rst","v.uGlobal.uOrdH")
+F.Intrinsic.Debug.Stop
+		F.ODBC.conX!rst.Close
+
+	F.Intrinsic.Control.EndIf
+	V.uGlobal.uOrdH.Redim(-1,-1)
+	F.Intrinsic.Control.CallSub(Setfieldref,"Run","0")
+F.Intrinsic.Control.Next(V.Local.iC)
+
+
+
+
+
+
+F.Intrinsic.Control.ExitSub
+
+F.Intrinsic.Control.Label("POPuDT_Err")
+F.Intrinsic.Control.If(V.Ambient.ErrorNumber,<>,0)
+	Function.Intrinsic.String.Concat("Project: GCG_3993_SA_Cust_Rank.gas",V.Ambient.Newline,V.Ambient.Newline,"Subroutine: ",V.Ambient.CurrentSubroutine,V.Ambient.NewLine,"Error Occurred ",V.Ambient.ErrorNumber," with description ",V.Ambient.ErrorDescription,V.Local.sError)
+	F.Intrinsic.UI.Msgbox(V.Local.sError)
+	F.Intrinsic.Control.CallSub(Ss_form1_unload)
+Function.Intrinsic.Control.EndIf
+
+
+Program.Sub.POPuDT.End
+
+Program.Sub.SetFieldRef.Start
+F.Intrinsic.Control.SetErrorHandler("SetFieldRef_Err")
+F.Intrinsic.Control.ClearErrors
+
+V.Local.sError.Declare(String)
+
+F.Intrinsic.Control.SelectCase(V.Args.Run)
+F.Intrinsic.Control.Case(0)
+	'udt reference when saving our current records
+	F.Intrinsic.Variable.SetUDTFieldReference(V.uGlobal.uOrdH!Customer,"")
+	F.Intrinsic.Variable.SetUDTFieldReference(V.uGlobal.uOrdH!BIRUNID,"")
+	F.Intrinsic.Variable.SetUDTFieldReference(V.uGlobal.uOrdH!C_P_Flag,"")
+	F.Intrinsic.Variable.SetUDTFieldReference(V.uGlobal.uOrdH!Rank,"")
+	F.Intrinsic.Variable.SetUDTFieldReference(V.uGlobal.uOrdH!Name_Cust,"")
+	F.Intrinsic.Variable.SetUDTFieldReference(V.uGlobal.uOrdH!Part,"Part")
+	F.Intrinsic.Variable.SetUDTFieldReference(V.uGlobal.uOrdh!Cost,"COST")
+	F.Intrinsic.Variable.SetUDTFieldReference(V.uglobal.uOrdH!Date_Invoice,"Date_Invoice")
+	F.Intrinsic.Variable.SetUDTFieldReference(V.uGlobal.uOrdH!Price,"Price")
+	F.Intrinsic.Variable.SetUDTFieldReference(V.uglobal.uOrdH!Extension,"Extension")
+	F.Intrinsic.Variable.SetUDTFieldReference(V.uGlobal.uOrdH!Margin,"Margin")
+	F.Intrinsic.Variable.SetUDTFieldReference(V.uGlobal.uOrdh!PY_Cost,"")
+	F.Intrinsic.Variable.SetUDTFieldReference(V.uGlobal.uOrdH!PY_Price,"")
+	F.Intrinsic.Variable.SetUDTFieldReference(V.uglobal.uOrdH!PY_Extension,"")
+	F.Intrinsic.Variable.SetUDTFieldReference(V.uGlobal.uOrdH!PY_Margin,"")
+F.Intrinsic.Control.Case(1)
+	'save our udt to our bi table so everything needs to be marked properly
+	F.Intrinsic.Variable.SetUDTFieldReference(V.uGlobal.uOrdH!Customer,"Customer")
+	F.Intrinsic.Variable.SetUDTFieldReference(V.uGlobal.uOrdH!BIRUNID,"BIRUNID")
+	F.Intrinsic.Variable.SetUDTFieldReference(V.uGlobal.uOrdH!C_P_Flag,"C_P_Flag")
+	F.Intrinsic.Variable.SetUDTFieldReference(V.uGlobal.uOrdH!Rank,"Customer_Rank")
+	F.Intrinsic.Variable.SetUDTFieldReference(V.uGlobal.uOrdH!Name_Cust,"Customer_Name")
+	F.Intrinsic.Variable.SetUDTFieldReference(V.uGlobal.uOrdH!Part,"Part")
+	F.Intrinsic.Variable.SetUDTFieldReference(V.uglobal.uOrdH!Date_Invoice,"Date_Invoice")
+	F.Intrinsic.Variable.SetUDTFieldReference(V.uGlobal.uOrdh!Cost,"Cost")
+	F.Intrinsic.Variable.SetUDTFieldReference(V.uGlobal.uOrdH!Price,"Price")
+	F.Intrinsic.Variable.SetUDTFieldReference(V.uglobal.uOrdH!Extension,"Extension")
+	F.Intrinsic.Variable.SetUDTFieldReference(V.uGlobal.uOrdH!Margin,"Margin")
+	F.Intrinsic.Variable.SetUDTFieldReference(V.uGlobal.uOrdh!PY_Cost,"PY_COST")
+	F.Intrinsic.Variable.SetUDTFieldReference(V.uGlobal.uOrdH!PY_Price,"PY_Price")
+	F.Intrinsic.Variable.SetUDTFieldReference(V.uglobal.uOrdH!PY_Extension,"PY_Extension")
+	F.Intrinsic.Variable.SetUDTFieldReference(V.uGlobal.uOrdH!PY_Margin,"PY_Margin")
+F.Intrinsic.Control.Case(2)
+	'previous year information to save.
+	F.Intrinsic.Variable.SetUDTFieldReference(V.uGlobal.uOrdH!Customer,"")
+	F.Intrinsic.Variable.SetUDTFieldReference(V.uGlobal.uOrdH!BIRUNID,"")
+	F.Intrinsic.Variable.SetUDTFieldReference(V.uGlobal.uOrdH!C_P_Flag,"")
+	F.Intrinsic.Variable.SetUDTFieldReference(V.uGlobal.uOrdH!Rank,"")
+	F.Intrinsic.Variable.SetUDTFieldReference(V.uGlobal.uOrdH!Name_Cust,"")
+	F.Intrinsic.Variable.SetUDTFieldReference(V.uGlobal.uOrdH!Part,"Part")
+	F.Intrinsic.Variable.SetUDTFieldReference(V.uglobal.uOrdH!Date_Invoice,"Date_Invoice")
+	F.Intrinsic.Variable.SetUDTFieldReference(V.uGlobal.uOrdh!Cost,"")
+	F.Intrinsic.Variable.SetUDTFieldReference(V.uGlobal.uOrdH!Price,"")
+	F.Intrinsic.Variable.SetUDTFieldReference(V.uglobal.uOrdH!Extension,"")
+	F.Intrinsic.Variable.SetUDTFieldReference(V.uGlobal.uOrdH!Margin,"")
+	F.Intrinsic.Variable.SetUDTFieldReference(V.uGlobal.uOrdh!PY_Cost,"COST")
+	F.Intrinsic.Variable.SetUDTFieldReference(V.uGlobal.uOrdH!PY_Price,"Price")
+	F.Intrinsic.Variable.SetUDTFieldReference(V.uglobal.uOrdH!PY_Extension,"Extension")
+	F.Intrinsic.Variable.SetUDTFieldReference(V.uGlobal.uOrdH!PY_Margin,"Margin")
+
+F.Intrinsic.Control.CaseElse
+	F.Intrinsic.UI.Msgbox("There has been an error please contact Global Shop.","GCG_3993_SA_Cust_Rank.GAS")
+	F.Intrinsic.Control.CallSub(Ss_form1_unload)
+F.Intrinsic.Control.EndSelect
+
+
+F.Intrinsic.Control.ExitSub
+
+F.Intrinsic.Control.Label("SetFieldRef_Err")
+F.Intrinsic.Control.If(V.Ambient.ErrorNumber,<>,0)
+	Function.Intrinsic.String.Concat("Project: GCG_3993_SA_Cust_Rank.gas",V.Ambient.Newline,V.Ambient.Newline,"Subroutine: ",V.Ambient.CurrentSubroutine,V.Ambient.NewLine,"Error Occurred ",V.Ambient.ErrorNumber," with description ",V.Ambient.ErrorDescription,V.Local.sError)
+	F.Intrinsic.UI.Msgbox(V.Local.sError)
+Function.Intrinsic.Control.EndIf
+
+
+Program.Sub.SetFieldRef.End
+
+
